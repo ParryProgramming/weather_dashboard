@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <title>Weather Dashboard</title>
+</head>
+
+<body>
+    <nav class="navbar"> Weather Dashboard </nav>
+
+    <section class="searcher">
+        <div class="column">
+            <h2>Search</h2>
+            <div class="search-wrapper">
+                <input type="text" id="search" placeholder="search city">
+                <label for="search" onclick="formSubmitHandler()">Search</label>
+                <div id="results"></div>
+            </div>
+        </div>
+        <div class="column-middle">
+            <div id="weatherForecast">
+                <div id="currentWeather"></div>
+            </div>
+            <div class="forecast">
+                <div id="weatherForecast">
+
+                    <div id="forecastContainer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+
+    <script src="./assets/js/script.js"></script>
+</body>
+
+</html>

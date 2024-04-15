@@ -1,0 +1,52 @@
+.navbar {
+    display: flex;
+    justify-content: center;
+    color: white;
+    background-color: black;
+    padding: 50px;
+    font-size: 60px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: solid red;
+    
+}
+
+h2 {
+
+    font-size: 40px;
+}
+
+.searcher {
+
+    display: flex;
+    flex-direction: row;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap ;
+    align-items: flex-start;
+    height: 600px;
+}
+
+.column-middle {
+    display: flex;
+    flex-direction: column;
+    border-style: solid;
+    width: 75%;
+}
+
+.forecast {
+
+    display: flex;
+    flex-direction: column;
+    height: 60%;
+
+}
+
+.forecastContainer {
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
