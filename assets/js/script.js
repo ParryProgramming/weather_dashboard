@@ -1,128 +1,167 @@
-let searchList = JSON.parse(localStorage.getItem("#results"));
-let nextSearch = JSON.parse(localStorage.getItem("new-search"));
+const APIKey = "c24db44d1844645a72452a97b36430be";
 
-let apiKey = "c24db44d1844645a72452a97b36430be";
-let city;
-let weatherElement = document.getElementById('currentWeather');
-const searchInput = document.getElementById('search');
-let forecast = document.getElementById('forecastContainer')
+async function getLatLon(cityName) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+    cityName
+  )}`;
 
-const formSubmitHandler = function (event) {
-    const city = searchInput.value
+  const resp = await fetch(url);
 
-    if (city) {
-        search(city);
+  const data = await resp.json();
 
-        searchInput.value = ''
+  return [data[0].lat, data[0].lon];
+}
+
+async function get_data(city) {
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKey}`;
+
+  const resp = await fetch(url);
+
+  let data = await resp.json();
+
+  data = filter_data(data);
+
+  return data;
+}
+
+function filter_data(data) {
+  const filteredData = {
+    ...data,
+    list: [],
+  };
+
+  const groupedData = {};
+
+  data.list.forEach((item) => {
+    const date = item.dt_txt.split(" ")[0];
+    if (!groupedData[date]) {
+      groupedData[date] = item;
     } else {
-        alert('please enter city')
+      const existingTime = new Date(groupedData[date].dt_txt);
+      const currentTime = new Date(item.dt_txt);
+      if (currentTime < existingTime) {
+        groupedData[date] = item;
+      }
     }
+  });
+
+  for (const date in groupedData) {
+    filteredData.list.push(groupedData[date]);
+  }
+
+  return filteredData;
+}
+
+// main 
+
+const btn_search = document.getElementById("btn_search");
+const city_list = document.querySelector(".city_list");
+const current_day_container = document.querySelector(".currentDay");
+const five_day_container = document.querySelector(".weatherCards");
+const txt_search = document.getElementById("search");
+
+// handle onload
+
+window.onload = () => {
+  let btn_html = "";
+
+  const list = JSON.parse(localStorage.getItem("list"));
+
+  list?.forEach((city) => {
+    btn_html += `
+        <button class="city_btn" onclick="handle_city_btn('${city}')">${city}</button>
+        
+        `;
+  });
+
+  city_list.innerHTML = btn_html;
 };
 
-function search(city) {
+// handle search btn click
+btn_search.onclick = async () => {
+  const city = txt_search.value;
+  if (!city) {
+    alert("please enter city name");
+    return;
+  }
 
-    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`
+  try {
+    const data = await get_data(city);
+
+    // show current day
+
+    let curr_html = `<div class="cardHeading">
+        <h2 class="heading">${data.city.name} ${formatDate(
+      data.list[0].dt_txt
+    )} 
+    <img src="http://openweathermap.org/img/w/${
+      data.list[0].weather[0].icon
+    }.png" />
+    
+    </h2>
+        <div class="icon">
+        <img src="http://openweathermap.org/img/w/${
+          data.list[0].weather[0].icon
+        }.png" />
+        
+        </div>
+      </div>
+      <p class="text">Temp:${data.list[0].main.temp} F</p>
+      <p class="text">Wind: ${data.list[0].wind.speed} MPH</p>
+      <p class="text">Humidity ${data.list[0].main.humidity} %</p>`;
+
+    let card_html = "";
+
+    for (let i = 1; i <= 5; i++)
+      [
+        (card_html += ` <div class="weatherCard">
+        <h4 class="cardHeading">${formatDate(data.list[i].dt_txt)}</h4>
+        <div class="icon">
+        <img src="http://openweathermap.org/img/w/${
+          data.list[i].weather[0].icon
+        }.png" />
+        </div>
+        <p class="text">Temp:${data.list[i].main.temp} F</p>
+        <p class="text">Wind: ${data.list[i].wind.speed} MPH</p>
+        <p class="text">Humidity ${data.list[i].main.humidity} %</p>
+      </div>`),
+      ];
+
+    current_day_container.innerHTML = curr_html;
+    five_day_container.innerHTML = card_html;
+
+    // store in local storage
+    add_to_storage(city);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+function formatDate(dateString) {
+  const [datePart, timePart] = dateString.split(" ");
+
+  const [year, month, day] = datePart.split("-");
+
+  return `${day}/${month}/${year}`;
 }
 
-fetch(apiUrl)
-    .then(function (response) {
-        if (response.ok) {
+function handle_city_btn(city) {
+  txt_search.value = city;
 
-            response.json()
-                .then(function (data) {
-
-                    console.log(data);
-                    displayWeather(data)
-                    get5dayForecast(city)
-                })
-        } else {
-
-            alert(`error: ${response.status.statusText}`);
-        }
-    })
-
-const displayWeather = function (data) {
-    const cityNameEl = document.createElement('h2');
-    const cityTempEl = document.createElement('h3');
-    const cityWindEl = document.createElement('h3');
-    const cityHumidity = document.createElement('h3');
-
-    const date = dayjs().format('MM/DD/YYYY');
-    console.log(data)
-    const iconPath = data.weather[0].icon;
-    const icon = weatherIcon(iconPath);
-
-    cityNameEl.textContent = `${data.name} (${date}) ${icon}`;
-    const cityTemp = (data.main.temp = 273.15) * (9 / 5) + 32;
-    cityTempEl.textContent = `Temp: ${cityTemp.toFixed(2)} F`;
-    cityWindEl.textContent = `Wind ${data.wind.speed} MPH`;
-    cityHumidityEl.textContent = `Humidity ${data.main.humidity} %`;
-
-    weatherElement.appendChild(cityNameEl);
-    weatherElement.appendChild(cityTempEl);
-    weatherElement.appendChild(cityWindEl);
-    weatherElement.appendChild(cityHumidityEl);
-
+  btn_search.click();
 }
 
-function addToHistory() {
+function add_to_storage(city) {
+  const prev_city = JSON.parse(localStorage.getItem("list")) || [];
 
-    const searchCity = document.getElementById('searchHistory');
-}
+  if (!prev_city.includes(city)) {
+    localStorage.setItem("list", JSON.stringify([...prev_city, city]));
 
-const forecastSearch = function (city) {
-    const queryURL = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`
+    const btn_html = `
+        <button class="city_btn" onclick="handle_city_btn('${city}')">${city}</button>
+        
+        `;
 
-    fetch(queryURL)
-        .then(function (response) {
-
-            if (response.ok) {
-                response.json()
-                    .then(function (data) {
-
-                        console.log(data);
-
-                        displayForecast(data)
-                    })
-            } else {
-                alert(`error: ${resopnse.statusText}`);
-            }
-
-        })
-}
-
-const displayForecast = function (data) {
-    for (let i = 1; i <= 5; i++) {
-
-        const forecastCard = document.createElement('div')
-        forecastCard.setAttribute('id', 'card')
-
-        const cityDateEl = document.createElement('h4')
-        const iconEl = document.createElement('h5')
-        const cityTempEl = document.createElement('h5')
-        const cityWindEl = document.createElement('h5')
-        const cityHumidityEl = document.createElement('h5')
-
-        const date = forecastDate(i)
-        const icon = forecastIcon(data, i)
-
-        cityDateEl.textContent = `${date}`;
-        iconEl.textContent = icon;
-
-        const cityTemp = (data.list[i].main.temp - 273.15) * (9 / 5) + 32;
-        cityTempEl.textContent = `Temp: ${cityTemp.toFixed(2)} F`;
-        cityWindEl.textContent = `Wind: ${data.list[i].wind.speed} MPH`;
-        cityHumidityEl.textContent = `Humidity: ${data.list[i].main.humidity} %`;
-
-        forecastCard.appendChild(cityDateEl);
-        forecastCard.appendChild(iconEl);
-        forecastCard.appendChild(cityTempEl);
-        forecastCard.appendChild(cityWindEl);
-        forecastCard.appendChild(cityHumidityEl);
-
-        forecastElement.appendChild(forecastCard);
-
-
-
-    }
+    city_list.innerHTML += btn_html;
+  }
 }

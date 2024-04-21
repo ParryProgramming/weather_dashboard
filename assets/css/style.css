@@ -29,7 +29,7 @@ body {
 .headerSection {
   text-align: center;
   padding: 0.5rem 0;
-  background-color: black;
+  background-color: grey;
 }
 
 .headerSection .headerText {
@@ -60,11 +60,11 @@ body {
 
 .mainSection .sideMenu .menuHeader .search .searchBtn {
   display: block;
-  background-color: black;
+  background-color: grey;
   border: 0;
   padding: 0.55rem 1.85rem;
   width: 100%;
-  color: #fff;
+  color: black;
   border-radius: 0.5rem;
 }
 
@@ -76,7 +76,7 @@ body {
 
 .mainSection .sideMenu .menuBody .city_list .city_btn {
   border: 0;
-  background-color: #ffffff;
+  background-color: #aeaeae;
   color: #000;
   padding: 0.55rem 1.35rem;
   border-radius: 0.5rem;
@@ -86,7 +86,7 @@ body {
 
 .mainSection .mainContent .currentDay {
   margin-top: 2rem;
-  border: 1px solid #000;
+  border: 1px solid white;
   padding: 1rem;
   margin-bottom: 2rem;
 }
@@ -107,9 +107,9 @@ body {
 }
 
 .mainSection .mainContent .FiveDayForecast .weatherCards .weatherCard {
-  background-color: #000000;
+  background-color: grey;
   padding: 1rem;
-  color: #fff;
+  color: black;
   border-radius: 0.5rem;
 }
 
@@ -118,6 +118,3 @@ body {
   margin-bottom: 1rem;
 }
 
-body {
-    background-color: #000;
-}
